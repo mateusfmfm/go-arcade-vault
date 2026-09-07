@@ -4,7 +4,7 @@ Domain API for an arcade cabinet shop: unique machines, atomic stock, orders, an
 
 Go services with Clean Architecture, gRPC internally, GraphQL at the edge, PostgreSQL via sqlc/pgx, RabbitMQ, and OpenTelemetry → Jaeger. Built as a portfolio system, not a generic CRUD store.
 
-**Status:** foundation. The architecture and build plan are documented; runtime pieces land by [phase](docs/ROADMAP.md). Commands below are the target developer loop — they are not all wired yet.
+**Status:** Phase 0 foundation — local stack, catalog gRPC health, traces, CI. Domain work lands in later [phases](docs/ROADMAP.md).
 
 ## Why this exists
 
@@ -45,14 +45,33 @@ Two bounded contexts on purpose. GraphQL lives only on the gateway. Postgres is 
 
 ## Checkout
 
-```
-createOrder (GraphQL)
-  → catalog reserves stock + writes order + outbox   (one transaction)
-  → RabbitMQ  order.created
-  → payments creates a Stripe PaymentIntent
-  → webhook
-       succeeded → order paid
-       failed    → order failed, stock released
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway as graphql-gateway
+    participant Catalog as catalog
+    participant DB as PostgreSQL
+    participant MQ as RabbitMQ
+    participant Pay as payments
+    participant Stripe
+
+    Client->>Gateway: createOrder
+    Gateway->>Catalog: gRPC CreateOrder
+    Catalog->>DB: reserve stock + order + outbox
+    Note over Catalog,DB: one transaction
+    Catalog-->>Gateway: pending_payment
+    Gateway-->>Client: Order
+    Catalog->>MQ: order.created
+    MQ->>Pay: consume
+    Pay->>Stripe: PaymentIntent
+    Stripe-->>Pay: webhook succeeded / failed
+    Pay->>MQ: payment.succeeded / payment.failed
+    MQ->>Catalog: apply status
+    alt succeeded
+        Catalog->>DB: order paid
+    else failed
+        Catalog->>DB: order failed, release stock
+    end
 ```
 
 Stock is taken when the order is created, not when Stripe confirms. Failure must roll availability back. Duplicate webhooks are no-ops.
@@ -90,22 +109,29 @@ deploy/compose
 
 ## Running locally
 
-Target loop once Phase 0+ is in place:
-
 ```bash
-make dev          # Compose: Postgres, RabbitMQ, Jaeger, services
-make test         # unit + integration (testcontainers)
+cp .env.example .env   # optional; defaults match Compose
+make compose-up        # Postgres, RabbitMQ, Jaeger
+make run-catalog       # gRPC health on :50051
+make test
 ```
 
 | Surface | URL |
 |---|---|
-| GraphiQL | to be published with the gateway |
+| Catalog gRPC | `localhost:50051` |
 | Jaeger UI | `http://localhost:16686` |
 | RabbitMQ UI | `http://localhost:15672` |
+| GraphiQL | later, with the gateway |
 
-**See a trace:** create an order in GraphiQL (or the equivalent gRPC call), open Jaeger, search service `gateway`, open the checkout trace. You should see gateway → catalog → SQL → publish → payments → Stripe → consume.
+**See a trace (Phase 0):** with Compose and catalog running:
 
-**Stripe (from Phase 4):** test card `4242 4242 4242 4242` for success; `4000 0000 0000 9995` for failure. Forward webhooks with Stripe CLI as documented when payments ships. Copy `.env.example` to `.env` — never commit secrets.
+```bash
+grpcurl -plaintext localhost:50051 grpc.health.v1.Health/Check
+```
+
+The process logs a JSON line with `trace_id` / `span_id`. In Jaeger, search service `catalog`. Checkout traces (gateway → payments → Stripe) arrive in later phases.
+
+**Stripe (from Phase 4):** `make compose-up` does not start stripe-cli (`profiles: [stripe]`). Test card `4242 4242 4242 4242` for success; `4000 0000 0000 9995` for failure. Never commit secrets.
 
 ## Tests that matter
 
