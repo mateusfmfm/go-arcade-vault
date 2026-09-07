@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package catalog.v1;
+
+option go_package = "github.com/mateusfmfm/go-arcade-vault/api/proto/catalog/v1;catalogv1";
+
+service CatalogService {
+    rpc ListCabinets(ListCabinetsRequest) returns (ListCabinetsResponse);
+    rpc GetCabinet(GetCabinetRequest) returns (GetCabinetResponse);
+    rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
+}
+
+message Cabinet {
+    string id = 1;
+    string slug = 2;
+    string model = 3;
+    string type = 4;
+    string display = 5;
+    string condition = 6;
+    int32 quantity = 7;
+    int64 price = 8;
+    string manufacturer = 9;
+    string year = 10;
+}
+
+message ListCabinetsRequest {}
+
+message ListCabinetsResponse {
+    repeated Cabinet cabinets = 1;
+}
+
+message GetCabinetRequest {
+    string id = 1;
+}
+
+message GetCabinetResponse {
+    Cabinet cabinet = 1;
+}
+
+message ReserveStockRequest {
+    string cabinet_id = 1;
+    int32 quantity = 2;
+    string idempotency_key = 3;
+}
+
+message ReserveStockResponse {
+    Cabinet cabinet = 1;
+    string idempotency_key = 2;
+}
