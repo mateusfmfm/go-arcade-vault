@@ -23,6 +23,15 @@ type CatalogCabinet struct {
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
+type CatalogCabinetImage struct {
+	ID        string             `json:"id"`
+	CabinetID string             `json:"cabinet_id"`
+	Url       string             `json:"url"`
+	Alt       string             `json:"alt"`
+	SortOrder int32              `json:"sort_order"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type CatalogReservation struct {
 	IdempotencyKey string             `json:"idempotency_key"`
 	CabinetID      string             `json:"cabinet_id"`

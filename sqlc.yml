@@ -10,3 +10,8 @@ sql:
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_exact_table_names: false
+        overrides:
+          - db_type: "jsonb"
+            nullable: false
+            go_type:
+              type: "CabinetImages"

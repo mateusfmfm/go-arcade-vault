@@ -15,6 +15,15 @@ CREATE TABLE catalog.cabinets (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE catalog.cabinet_images (
+    id VARCHAR(36) PRIMARY KEY,
+    cabinet_id VARCHAR(36) NOT NULL REFERENCES catalog.cabinets(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    alt TEXT NOT NULL DEFAULT '',
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE catalog.reservations (
     idempotency_key VARCHAR(255) PRIMARY KEY,
     cabinet_id VARCHAR(36) NOT NULL REFERENCES catalog.cabinets(id),
@@ -23,3 +32,4 @@ CREATE TABLE catalog.reservations (
 );
 
 CREATE INDEX idx_cabinets_slug ON catalog.cabinets(slug);
+CREATE INDEX idx_cabinet_images_cabinet_id ON catalog.cabinet_images(cabinet_id);

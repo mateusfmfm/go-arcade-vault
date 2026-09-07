@@ -21,6 +21,74 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type CabinetImage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	Alt           string                 `protobuf:"bytes,3,opt,name=alt,proto3" json:"alt,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,4,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CabinetImage) Reset() {
+	*x = CabinetImage{}
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CabinetImage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CabinetImage) ProtoMessage() {}
+
+func (x *CabinetImage) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CabinetImage.ProtoReflect.Descriptor instead.
+func (*CabinetImage) Descriptor() ([]byte, []int) {
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *CabinetImage) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *CabinetImage) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *CabinetImage) GetAlt() string {
+	if x != nil {
+		return x.Alt
+	}
+	return ""
+}
+
+func (x *CabinetImage) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
 type Cabinet struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -33,13 +101,14 @@ type Cabinet struct {
 	Price         int64                  `protobuf:"varint,8,opt,name=price,proto3" json:"price,omitempty"`
 	Manufacturer  string                 `protobuf:"bytes,9,opt,name=manufacturer,proto3" json:"manufacturer,omitempty"`
 	Year          string                 `protobuf:"bytes,10,opt,name=year,proto3" json:"year,omitempty"`
+	Images        []*CabinetImage        `protobuf:"bytes,11,rep,name=images,proto3" json:"images,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Cabinet) Reset() {
 	*x = Cabinet{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[0]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -51,7 +120,7 @@ func (x *Cabinet) String() string {
 func (*Cabinet) ProtoMessage() {}
 
 func (x *Cabinet) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[0]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,7 +133,7 @@ func (x *Cabinet) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Cabinet.ProtoReflect.Descriptor instead.
 func (*Cabinet) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{0}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Cabinet) GetId() string {
@@ -137,6 +206,13 @@ func (x *Cabinet) GetYear() string {
 	return ""
 }
 
+func (x *Cabinet) GetImages() []*CabinetImage {
+	if x != nil {
+		return x.Images
+	}
+	return nil
+}
+
 type ListCabinetsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -145,7 +221,7 @@ type ListCabinetsRequest struct {
 
 func (x *ListCabinetsRequest) Reset() {
 	*x = ListCabinetsRequest{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[1]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -157,7 +233,7 @@ func (x *ListCabinetsRequest) String() string {
 func (*ListCabinetsRequest) ProtoMessage() {}
 
 func (x *ListCabinetsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[1]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -170,7 +246,7 @@ func (x *ListCabinetsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCabinetsRequest.ProtoReflect.Descriptor instead.
 func (*ListCabinetsRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{1}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{2}
 }
 
 type ListCabinetsResponse struct {
@@ -182,7 +258,7 @@ type ListCabinetsResponse struct {
 
 func (x *ListCabinetsResponse) Reset() {
 	*x = ListCabinetsResponse{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[2]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -194,7 +270,7 @@ func (x *ListCabinetsResponse) String() string {
 func (*ListCabinetsResponse) ProtoMessage() {}
 
 func (x *ListCabinetsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[2]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -207,7 +283,7 @@ func (x *ListCabinetsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCabinetsResponse.ProtoReflect.Descriptor instead.
 func (*ListCabinetsResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{2}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListCabinetsResponse) GetCabinets() []*Cabinet {
@@ -226,7 +302,7 @@ type GetCabinetRequest struct {
 
 func (x *GetCabinetRequest) Reset() {
 	*x = GetCabinetRequest{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[3]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -238,7 +314,7 @@ func (x *GetCabinetRequest) String() string {
 func (*GetCabinetRequest) ProtoMessage() {}
 
 func (x *GetCabinetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[3]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -251,7 +327,7 @@ func (x *GetCabinetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCabinetRequest.ProtoReflect.Descriptor instead.
 func (*GetCabinetRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{3}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetCabinetRequest) GetId() string {
@@ -270,7 +346,7 @@ type GetCabinetResponse struct {
 
 func (x *GetCabinetResponse) Reset() {
 	*x = GetCabinetResponse{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[4]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -282,7 +358,7 @@ func (x *GetCabinetResponse) String() string {
 func (*GetCabinetResponse) ProtoMessage() {}
 
 func (x *GetCabinetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[4]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -295,7 +371,7 @@ func (x *GetCabinetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCabinetResponse.ProtoReflect.Descriptor instead.
 func (*GetCabinetResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{4}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetCabinetResponse) GetCabinet() *Cabinet {
@@ -316,7 +392,7 @@ type ReserveStockRequest struct {
 
 func (x *ReserveStockRequest) Reset() {
 	*x = ReserveStockRequest{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[5]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -328,7 +404,7 @@ func (x *ReserveStockRequest) String() string {
 func (*ReserveStockRequest) ProtoMessage() {}
 
 func (x *ReserveStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[5]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -341,7 +417,7 @@ func (x *ReserveStockRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReserveStockRequest.ProtoReflect.Descriptor instead.
 func (*ReserveStockRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{5}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ReserveStockRequest) GetCabinetId() string {
@@ -375,7 +451,7 @@ type ReserveStockResponse struct {
 
 func (x *ReserveStockResponse) Reset() {
 	*x = ReserveStockResponse{}
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[6]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -387,7 +463,7 @@ func (x *ReserveStockResponse) String() string {
 func (*ReserveStockResponse) ProtoMessage() {}
 
 func (x *ReserveStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[6]
+	mi := &file_api_proto_catalog_v1_catalog_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -400,7 +476,7 @@ func (x *ReserveStockResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReserveStockResponse.ProtoReflect.Descriptor instead.
 func (*ReserveStockResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{6}
+	return file_api_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ReserveStockResponse) GetCabinet() *Cabinet {
@@ -422,7 +498,13 @@ var File_api_proto_catalog_v1_catalog_proto protoreflect.FileDescriptor
 const file_api_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"\"api/proto/catalog/v1/catalog.proto\x12\n" +
-	"catalog.v1\"\xf9\x01\n" +
+	"catalog.v1\"a\n" +
+	"\fCabinetImage\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\x12\x10\n" +
+	"\x03alt\x18\x03 \x01(\tR\x03alt\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\x04 \x01(\x05R\tsortOrder\"\xab\x02\n" +
 	"\aCabinet\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04slug\x18\x02 \x01(\tR\x04slug\x12\x14\n" +
@@ -434,7 +516,8 @@ const file_api_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\x05price\x18\b \x01(\x03R\x05price\x12\"\n" +
 	"\fmanufacturer\x18\t \x01(\tR\fmanufacturer\x12\x12\n" +
 	"\x04year\x18\n" +
-	" \x01(\tR\x04year\"\x15\n" +
+	" \x01(\tR\x04year\x120\n" +
+	"\x06images\x18\v \x03(\v2\x18.catalog.v1.CabinetImageR\x06images\"\x15\n" +
 	"\x13ListCabinetsRequest\"G\n" +
 	"\x14ListCabinetsResponse\x12/\n" +
 	"\bcabinets\x18\x01 \x03(\v2\x13.catalog.v1.CabinetR\bcabinets\"#\n" +
@@ -468,31 +551,33 @@ func file_api_proto_catalog_v1_catalog_proto_rawDescGZIP() []byte {
 	return file_api_proto_catalog_v1_catalog_proto_rawDescData
 }
 
-var file_api_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_api_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_api_proto_catalog_v1_catalog_proto_goTypes = []any{
-	(*Cabinet)(nil),              // 0: catalog.v1.Cabinet
-	(*ListCabinetsRequest)(nil),  // 1: catalog.v1.ListCabinetsRequest
-	(*ListCabinetsResponse)(nil), // 2: catalog.v1.ListCabinetsResponse
-	(*GetCabinetRequest)(nil),    // 3: catalog.v1.GetCabinetRequest
-	(*GetCabinetResponse)(nil),   // 4: catalog.v1.GetCabinetResponse
-	(*ReserveStockRequest)(nil),  // 5: catalog.v1.ReserveStockRequest
-	(*ReserveStockResponse)(nil), // 6: catalog.v1.ReserveStockResponse
+	(*CabinetImage)(nil),         // 0: catalog.v1.CabinetImage
+	(*Cabinet)(nil),              // 1: catalog.v1.Cabinet
+	(*ListCabinetsRequest)(nil),  // 2: catalog.v1.ListCabinetsRequest
+	(*ListCabinetsResponse)(nil), // 3: catalog.v1.ListCabinetsResponse
+	(*GetCabinetRequest)(nil),    // 4: catalog.v1.GetCabinetRequest
+	(*GetCabinetResponse)(nil),   // 5: catalog.v1.GetCabinetResponse
+	(*ReserveStockRequest)(nil),  // 6: catalog.v1.ReserveStockRequest
+	(*ReserveStockResponse)(nil), // 7: catalog.v1.ReserveStockResponse
 }
 var file_api_proto_catalog_v1_catalog_proto_depIdxs = []int32{
-	0, // 0: catalog.v1.ListCabinetsResponse.cabinets:type_name -> catalog.v1.Cabinet
-	0, // 1: catalog.v1.GetCabinetResponse.cabinet:type_name -> catalog.v1.Cabinet
-	0, // 2: catalog.v1.ReserveStockResponse.cabinet:type_name -> catalog.v1.Cabinet
-	1, // 3: catalog.v1.CatalogService.ListCabinets:input_type -> catalog.v1.ListCabinetsRequest
-	3, // 4: catalog.v1.CatalogService.GetCabinet:input_type -> catalog.v1.GetCabinetRequest
-	5, // 5: catalog.v1.CatalogService.ReserveStock:input_type -> catalog.v1.ReserveStockRequest
-	2, // 6: catalog.v1.CatalogService.ListCabinets:output_type -> catalog.v1.ListCabinetsResponse
-	4, // 7: catalog.v1.CatalogService.GetCabinet:output_type -> catalog.v1.GetCabinetResponse
-	6, // 8: catalog.v1.CatalogService.ReserveStock:output_type -> catalog.v1.ReserveStockResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 0: catalog.v1.Cabinet.images:type_name -> catalog.v1.CabinetImage
+	1, // 1: catalog.v1.ListCabinetsResponse.cabinets:type_name -> catalog.v1.Cabinet
+	1, // 2: catalog.v1.GetCabinetResponse.cabinet:type_name -> catalog.v1.Cabinet
+	1, // 3: catalog.v1.ReserveStockResponse.cabinet:type_name -> catalog.v1.Cabinet
+	2, // 4: catalog.v1.CatalogService.ListCabinets:input_type -> catalog.v1.ListCabinetsRequest
+	4, // 5: catalog.v1.CatalogService.GetCabinet:input_type -> catalog.v1.GetCabinetRequest
+	6, // 6: catalog.v1.CatalogService.ReserveStock:input_type -> catalog.v1.ReserveStockRequest
+	3, // 7: catalog.v1.CatalogService.ListCabinets:output_type -> catalog.v1.ListCabinetsResponse
+	5, // 8: catalog.v1.CatalogService.GetCabinet:output_type -> catalog.v1.GetCabinetResponse
+	7, // 9: catalog.v1.CatalogService.ReserveStock:output_type -> catalog.v1.ReserveStockResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_catalog_v1_catalog_proto_init() }
@@ -506,7 +591,7 @@ func file_api_proto_catalog_v1_catalog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_catalog_v1_catalog_proto_rawDesc), len(file_api_proto_catalog_v1_catalog_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -10,6 +10,13 @@ service CatalogService {
     rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
 }
 
+message CabinetImage {
+    string id = 1;
+    string url = 2;
+    string alt = 3;
+    int32 sort_order = 4;
+}
+
 message Cabinet {
     string id = 1;
     string slug = 2;
@@ -21,6 +28,7 @@ message Cabinet {
     int64 price = 8;
     string manufacturer = 9;
     string year = 10;
+    repeated CabinetImage images = 11;
 }
 
 message ListCabinetsRequest {}

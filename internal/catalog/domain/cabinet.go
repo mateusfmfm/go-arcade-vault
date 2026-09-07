@@ -24,8 +24,17 @@ type Cabinet struct {
 	Price        int64
 	Manufacturer string
 	Year         string
+	Images       []CabinetImage
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+// CabinetImage is a photo of a cabinet, ordered for display.
+type CabinetImage struct {
+	ID        string
+	URL       string
+	Alt       string
+	SortOrder int
 }
 
 // Reservation entity represents the reservation of a cabinet

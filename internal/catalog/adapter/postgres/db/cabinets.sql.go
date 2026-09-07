@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createReservation = `-- name: CreateReservation :exec
@@ -26,11 +28,36 @@ func (q *Queries) CreateReservation(ctx context.Context, arg CreateReservationPa
 }
 
 const decrementStock = `-- name: DecrementStock :one
-UPDATE catalog.cabinets
+UPDATE catalog.cabinets c
 SET quantity = quantity - $1,
     updated_at = NOW()
-WHERE id = $2 AND quantity >= $1
-RETURNING id, slug, model, type, display, condition, quantity, price, manufacturer, year, created_at, updated_at
+WHERE c.id = $2 AND c.quantity >= $1
+RETURNING
+    c.id,
+    c.slug,
+    c.model,
+    c.type,
+    c.display,
+    c.condition,
+    c.quantity,
+    c.price,
+    c.manufacturer,
+    c.year,
+    c.created_at,
+    c.updated_at,
+    COALESCE((
+        SELECT json_agg(
+            json_build_object(
+                'id', i.id,
+                'url', i.url,
+                'alt', i.alt,
+                'sort_order', i.sort_order
+            )
+            ORDER BY i.sort_order ASC, i.created_at ASC
+        )
+        FROM catalog.cabinet_images i
+        WHERE i.cabinet_id = c.id
+    ), '[]'::jsonb)::jsonb AS images
 `
 
 type DecrementStockParams struct {
@@ -38,9 +65,25 @@ type DecrementStockParams struct {
 	ID       string `json:"id"`
 }
 
-func (q *Queries) DecrementStock(ctx context.Context, arg DecrementStockParams) (CatalogCabinet, error) {
+type DecrementStockRow struct {
+	ID           string             `json:"id"`
+	Slug         string             `json:"slug"`
+	Model        string             `json:"model"`
+	Type         string             `json:"type"`
+	Display      string             `json:"display"`
+	Condition    string             `json:"condition"`
+	Quantity     int32              `json:"quantity"`
+	Price        int64              `json:"price"`
+	Manufacturer string             `json:"manufacturer"`
+	Year         string             `json:"year"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	Images       CabinetImages      `json:"images"`
+}
+
+func (q *Queries) DecrementStock(ctx context.Context, arg DecrementStockParams) (DecrementStockRow, error) {
 	row := q.db.QueryRow(ctx, decrementStock, arg.Quantity, arg.ID)
-	var i CatalogCabinet
+	var i DecrementStockRow
 	err := row.Scan(
 		&i.ID,
 		&i.Slug,
@@ -54,18 +97,61 @@ func (q *Queries) DecrementStock(ctx context.Context, arg DecrementStockParams) 
 		&i.Year,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Images,
 	)
 	return i, err
 }
 
 const getCabinet = `-- name: GetCabinet :one
-SELECT id, slug, model, type, display, condition, quantity, price, manufacturer, year, created_at, updated_at FROM catalog.cabinets
-WHERE id = $1
+SELECT
+    c.id,
+    c.slug,
+    c.model,
+    c.type,
+    c.display,
+    c.condition,
+    c.quantity,
+    c.price,
+    c.manufacturer,
+    c.year,
+    c.created_at,
+    c.updated_at,
+    COALESCE((
+        SELECT json_agg(
+            json_build_object(
+                'id', i.id,
+                'url', i.url,
+                'alt', i.alt,
+                'sort_order', i.sort_order
+            )
+            ORDER BY i.sort_order ASC, i.created_at ASC
+        )
+        FROM catalog.cabinet_images i
+        WHERE i.cabinet_id = c.id
+    ), '[]'::jsonb)::jsonb AS images
+FROM catalog.cabinets c
+WHERE c.id = $1
 `
 
-func (q *Queries) GetCabinet(ctx context.Context, id string) (CatalogCabinet, error) {
+type GetCabinetRow struct {
+	ID           string             `json:"id"`
+	Slug         string             `json:"slug"`
+	Model        string             `json:"model"`
+	Type         string             `json:"type"`
+	Display      string             `json:"display"`
+	Condition    string             `json:"condition"`
+	Quantity     int32              `json:"quantity"`
+	Price        int64              `json:"price"`
+	Manufacturer string             `json:"manufacturer"`
+	Year         string             `json:"year"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	Images       CabinetImages      `json:"images"`
+}
+
+func (q *Queries) GetCabinet(ctx context.Context, id string) (GetCabinetRow, error) {
 	row := q.db.QueryRow(ctx, getCabinet, id)
-	var i CatalogCabinet
+	var i GetCabinetRow
 	err := row.Scan(
 		&i.ID,
 		&i.Slug,
@@ -79,6 +165,7 @@ func (q *Queries) GetCabinet(ctx context.Context, id string) (CatalogCabinet, er
 		&i.Year,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Images,
 	)
 	return i, err
 }
@@ -101,19 +188,61 @@ func (q *Queries) GetReservation(ctx context.Context, idempotencyKey string) (Ca
 }
 
 const listCabinets = `-- name: ListCabinets :many
-SELECT id, slug, model, type, display, condition, quantity, price, manufacturer, year, created_at, updated_at FROM catalog.cabinets
-ORDER BY created_at DESC
+SELECT
+    c.id,
+    c.slug,
+    c.model,
+    c.type,
+    c.display,
+    c.condition,
+    c.quantity,
+    c.price,
+    c.manufacturer,
+    c.year,
+    c.created_at,
+    c.updated_at,
+    COALESCE((
+        SELECT json_agg(
+            json_build_object(
+                'id', i.id,
+                'url', i.url,
+                'alt', i.alt,
+                'sort_order', i.sort_order
+            )
+            ORDER BY i.sort_order ASC, i.created_at ASC
+        )
+        FROM catalog.cabinet_images i
+        WHERE i.cabinet_id = c.id
+    ), '[]'::jsonb)::jsonb AS images
+FROM catalog.cabinets c
+ORDER BY c.created_at DESC
 `
 
-func (q *Queries) ListCabinets(ctx context.Context) ([]CatalogCabinet, error) {
+type ListCabinetsRow struct {
+	ID           string             `json:"id"`
+	Slug         string             `json:"slug"`
+	Model        string             `json:"model"`
+	Type         string             `json:"type"`
+	Display      string             `json:"display"`
+	Condition    string             `json:"condition"`
+	Quantity     int32              `json:"quantity"`
+	Price        int64              `json:"price"`
+	Manufacturer string             `json:"manufacturer"`
+	Year         string             `json:"year"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	Images       CabinetImages      `json:"images"`
+}
+
+func (q *Queries) ListCabinets(ctx context.Context) ([]ListCabinetsRow, error) {
 	rows, err := q.db.Query(ctx, listCabinets)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CatalogCabinet
+	var items []ListCabinetsRow
 	for rows.Next() {
-		var i CatalogCabinet
+		var i ListCabinetsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Slug,
@@ -127,6 +256,7 @@ func (q *Queries) ListCabinets(ctx context.Context) ([]CatalogCabinet, error) {
 			&i.Year,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Images,
 		); err != nil {
 			return nil, err
 		}
