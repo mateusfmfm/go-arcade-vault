@@ -57,7 +57,7 @@ RETURNING
         )
         FROM catalog.cabinet_images i
         WHERE i.cabinet_id = c.id
-    ), '[]'::jsonb)::jsonb AS images
+    ), '[]'::json)::jsonb AS images
 `
 
 type DecrementStockParams struct {
@@ -128,7 +128,7 @@ SELECT
         )
         FROM catalog.cabinet_images i
         WHERE i.cabinet_id = c.id
-    ), '[]'::jsonb)::jsonb AS images
+    ), '[]'::json)::jsonb AS images
 FROM catalog.cabinets c
 WHERE c.id = $1
 `
@@ -213,7 +213,7 @@ SELECT
         )
         FROM catalog.cabinet_images i
         WHERE i.cabinet_id = c.id
-    ), '[]'::jsonb)::jsonb AS images
+    ), '[]'::json)::jsonb AS images
 FROM catalog.cabinets c
 ORDER BY c.created_at DESC
 `

@@ -24,7 +24,7 @@ SELECT
         )
         FROM catalog.cabinet_images i
         WHERE i.cabinet_id = c.id
-    ), '[]'::jsonb)::jsonb AS images
+    ), '[]'::json)::jsonb AS images
 FROM catalog.cabinets c
 WHERE c.id = $1;
 
@@ -54,7 +54,7 @@ SELECT
         )
         FROM catalog.cabinet_images i
         WHERE i.cabinet_id = c.id
-    ), '[]'::jsonb)::jsonb AS images
+    ), '[]'::json)::jsonb AS images
 FROM catalog.cabinets c
 ORDER BY c.created_at DESC;
 
@@ -88,7 +88,7 @@ RETURNING
         )
         FROM catalog.cabinet_images i
         WHERE i.cabinet_id = c.id
-    ), '[]'::jsonb)::jsonb AS images;
+    ), '[]'::json)::jsonb AS images;
 
 -- name: CreateReservation :exec
 INSERT INTO catalog.reservations (idempotency_key, cabinet_id, quantity)
