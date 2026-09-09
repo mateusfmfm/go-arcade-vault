@@ -40,7 +40,7 @@ func (h *CabinetHandler) ListCabinets(ctx context.Context, req *catalogv1.ListCa
 }
 
 // GetCabinet gets a cabinet by ID
-func (h *CabinetHandler) GetCabinet(ctx context.Context, req *catalogv1.GetCabinetRequest) (*catalogv1.Cabinet, error) {
+func (h *CabinetHandler) GetCabinet(ctx context.Context, req *catalogv1.GetCabinetRequest) (*catalogv1.GetCabinetResponse, error) {
 	cabinet, err := h.usecase.GetCabinet(ctx, req.Id)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
@@ -48,7 +48,9 @@ func (h *CabinetHandler) GetCabinet(ctx context.Context, req *catalogv1.GetCabin
 		}
 		return nil, status.Errorf(codes.Internal, "failed to get cabinet: %v", err)
 	}
-	return mapCabinetToProto(cabinet), nil
+	return &catalogv1.GetCabinetResponse{
+		Cabinet: mapCabinetToProto(cabinet),
+	}, nil
 }
 
 // ReserveStock executes a stock reservation
