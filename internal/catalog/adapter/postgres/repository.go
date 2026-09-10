@@ -24,7 +24,10 @@ func (r *CabinetRepositoryImpl) GetCabinet(ctx context.Context, id string) (*dom
 	queries := db.New(r.pool)
 	c, err := queries.GetCabinet(ctx, id)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to get cabinet: %w", err)
 	}
 	return mapCabinetToDomain(c), nil
 }
