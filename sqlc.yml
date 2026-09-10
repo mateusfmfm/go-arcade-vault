@@ -1,7 +1,8 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    schema: "db/catalog/migrations"
+    schema:
+      - "db/catalog/migrations/000001_create_cabinets_and_reservations.up.sql"
     queries: "db/catalog/queries"
     gen:
       go:

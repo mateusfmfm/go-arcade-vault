@@ -66,6 +66,11 @@ func main() {
 		dbURL = defaultDbURL
 	}
 
+	if err := postgres.RunMigrations(dbURL); err != nil {
+		slog.Error("failed to run database migrations", "error", err)
+		os.Exit(1)
+	}
+
 	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
 		slog.Error("unable to connect to database", "error", err)
@@ -73,7 +78,6 @@ func main() {
 	}
 	defer pool.Close()
 
-	//PERFORM SEED CABINET
 	seedCabinets(ctx, pool)
 
 	//4. Dependency Injection (GRPC)

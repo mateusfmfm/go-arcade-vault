@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/domain"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	otelcodes "go.opentelemetry.io/otel/codes"
 )
 
 type CabinetUsecase struct {
@@ -25,8 +28,24 @@ func (u *CabinetUsecase) ListCabinets(ctx context.Context) ([]*domain.Cabinet, e
 }
 
 func (u *CabinetUsecase) ReserveStockTx(ctx context.Context, cabinetID string, quantity int, idempotencyKey string) (*domain.Cabinet, error) {
+	ctx, span := otel.Tracer("catalog").Start(ctx, "ReserveCabinet")
+	defer span.End()
+	span.SetAttributes(
+		attribute.String("cabinet_id", cabinetID),
+		attribute.Int("quantity", quantity),
+		attribute.String("idempotency_key", idempotencyKey),
+	)
+
 	if quantity <= 0 {
+		span.SetStatus(otelcodes.Error, domain.ErrInsufficientStock.Error())
 		return nil, domain.ErrInsufficientStock
 	}
-	return u.repository.ReserveStockTx(ctx, cabinetID, quantity, idempotencyKey)
+
+	cabinet, err := u.repository.ReserveStockTx(ctx, cabinetID, quantity, idempotencyKey)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(otelcodes.Error, err.Error())
+		return nil, err
+	}
+	return cabinet, nil
 }

@@ -42,6 +42,20 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
 
+  migrate:
+    profiles: ["migrate"]
+    image: migrate/migrate:v4.18.3
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../../db/catalog/migrations:/migrations:ro
+    command:
+      - -path=/migrations
+      - -database
+      - postgres://arcade_user:arcade_password@postgres:5432/arcade_db?sslmode=disable
+      - up
+
   stripe-cli:
     profiles: ["stripe"]
     image: stripe/stripe-cli:v1.19.1

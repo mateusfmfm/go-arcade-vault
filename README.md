@@ -111,10 +111,12 @@ deploy/compose
 
 ```bash
 cp .env.example .env   # optional; defaults match Compose
-make compose-up        # Postgres, RabbitMQ, Jaeger
-make run-catalog       # gRPC health on :50051
+make compose-up        # Postgres, RabbitMQ, Jaeger + catalog migrations
+make run-catalog       # migrates (if needed), seeds, gRPC on :50051
 make test
 ```
+
+`make compose-up` applies `db/catalog/migrations` after Postgres is healthy. `make run-catalog` runs the same migrations again (no-op if already applied) and then seeds cabinets. Re-run migrations later with `make migrate`.
 
 | Surface | URL |
 |---|---|
@@ -123,13 +125,7 @@ make test
 | RabbitMQ UI | `http://localhost:15672` |
 | GraphiQL | later, with the gateway |
 
-**See a trace (Phase 0):** with Compose and catalog running:
-
-```bash
-grpcurl -plaintext localhost:50051 grpc.health.v1.Health/Check
-```
-
-The process logs a JSON line with `trace_id` / `span_id`. In Jaeger, search service `catalog`. Checkout traces (gateway → payments → Stripe) arrive in later phases.
+**See a trace:** with Compose and catalog running, `grpcurl` a `ReserveStock` (or Health/Check). In Jaeger, search service `catalog`. `ReserveStock` should show a child span named `ReserveCabinet`. Checkout traces (gateway → payments → Stripe) arrive in later phases.
 
 **Stripe (from Phase 4):** `make compose-up` does not start stripe-cli (`profiles: [stripe]`). Test card `4242 4242 4242 4242` for success; `4000 0000 0000 9995` for failure. Never commit secrets.
 
