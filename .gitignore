@@ -27,6 +27,9 @@ go.work.sum
 # env file
 .env
 
+# Local interview / study notes (not part of the public repo)
+.doc/
+
 # Editor/IDE
 # .idea/
 # .vscode/
