@@ -8,6 +8,8 @@ service CatalogService {
     rpc ListCabinets(ListCabinetsRequest) returns (ListCabinetsResponse);
     rpc GetCabinet(GetCabinetRequest) returns (GetCabinetResponse);
     rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
+    rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+    rpc GetOrder (GetOrderRequest) returns (GetOrderResponse);
 }
 
 message CabinetImage {
@@ -54,4 +56,41 @@ message ReserveStockRequest {
 message ReserveStockResponse {
     Cabinet cabinet = 1;
     string idempotency_key = 2;
+}
+
+message OrderItemInput {
+    string cabinet_id = 1;
+    int32 quantity = 2;
+}
+
+message CreateOrderRequest {
+    string idempotency_key = 1;
+    repeated OrderItemInput items = 2;
+}
+
+message OrderLine {
+    string cabinet_id = 1;
+    int32 quantity = 2;
+    int64 unit_price_cents = 3;
+}
+
+message Order {
+    string id = 1;
+    string user_id = 2;
+    string status = 3; // pending_payment | paid | cancelled | failed
+    int64 total_cents = 4;
+    repeated OrderLine items = 5;
+    string idempotency_key = 6; 
+}
+
+message CreateOrderResponse {
+    Order order = 1;
+}
+
+message GetOrderRequest {
+    string id = 1;
+}
+
+message GetOrderResponse {
+    Order order = 1;
 }
