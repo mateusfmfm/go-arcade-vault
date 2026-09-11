@@ -53,9 +53,23 @@ func (r *CabinetRepositoryImpl) ReserveStockTx(ctx context.Context, cabinetID st
 	}
 	defer tx.Rollback(ctx)
 
+	cabinet, err := r.ReserveStockOnTx(ctx, tx, cabinetID, quantity, idempotencyKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return cabinet, nil
+}
+
+// ReserveStockOnTx executes the reservation logic using a pgx.Tx transaction
+func (r *CabinetRepositoryImpl) ReserveStockOnTx(ctx context.Context, tx pgx.Tx, cabinetID string, quantity int, idempotencyKey string) (*domain.Cabinet, error) {
 	qtx := db.New(tx)
 
-	//1. Check idempotency: if the key was already used, returns the reservation
+	//1. Check stock idempotency: if the key was already used, returns the reservation
 	existingRes, err := qtx.GetReservation(ctx, idempotencyKey)
 	if err == nil {
 		if existingRes.CabinetID != cabinetID || int(existingRes.Quantity) != quantity {
@@ -65,10 +79,10 @@ func (r *CabinetRepositoryImpl) ReserveStockTx(ctx context.Context, cabinetID st
 		if err != nil {
 			return nil, fmt.Errorf("failed to get cabinet for existing reservation: %w", err)
 		}
-		_ = tx.Commit(ctx)
 		return mapCabinetToDomain(c), nil
 	}
-	//2. Try to decrement the stock
+
+	//2. Try to decrement the stock (UPDATE ... WHERE quantity >= @quantity)
 	c, err := qtx.DecrementStock(ctx, db.DecrementStockParams{
 		ID:       cabinetID,
 		Quantity: int32(quantity),
@@ -80,13 +94,12 @@ func (r *CabinetRepositoryImpl) ReserveStockTx(ctx context.Context, cabinetID st
 		return nil, fmt.Errorf("failed to decrement stock: %w", err)
 	}
 
-	//3. Save the idempotency key on the table catalog.reservations
+	//3. Register the stock idempotency key on the table catalog.reservations
 	err = qtx.CreateReservation(ctx, db.CreateReservationParams{
 		IdempotencyKey: idempotencyKey,
 		CabinetID:      cabinetID,
 		Quantity:       int32(quantity),
 	})
-
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -95,13 +108,8 @@ func (r *CabinetRepositoryImpl) ReserveStockTx(ctx context.Context, cabinetID st
 		return nil, fmt.Errorf("failed to create reservation: %w", err)
 	}
 
-	//4. Commit the transaction
-	err = tx.Commit(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to commit transaction: %w", err)
-	}
-
 	return mapCabinetToDomain(db.GetCabinetRow(c)), nil
+
 }
 
 func mapCabinetToDomain(c db.GetCabinetRow) *domain.Cabinet {
