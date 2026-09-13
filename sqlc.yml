@@ -3,6 +3,7 @@ sql:
   - engine: "postgresql"
     schema:
       - "db/catalog/migrations/000001_create_cabinets_and_reservations.up.sql"
+      - "db/catalog/migrations/000002_create_orders_and_outbox.up.sql"
     queries: "db/catalog/queries"
     gen:
       go:

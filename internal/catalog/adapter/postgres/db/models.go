@@ -32,6 +32,33 @@ type CatalogCabinetImage struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type CatalogOrder struct {
+	ID             string             `json:"id"`
+	UserID         string             `json:"user_id"`
+	Status         string             `json:"status"`
+	TotalCents     int64              `json:"total_cents"`
+	IdempotencyKey string             `json:"idempotency_key"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type CatalogOrderItem struct {
+	ID             string `json:"id"`
+	OrderID        string `json:"order_id"`
+	CabinetID      string `json:"cabinet_id"`
+	Quantity       int32  `json:"quantity"`
+	UnitPriceCents int64  `json:"unit_price_cents"`
+}
+
+type CatalogOutbox struct {
+	ID          interface{}        `json:"id"`
+	AggregateID string             `json:"aggregate_id"`
+	EventType   string             `json:"event_type"`
+	Payload     CabinetImages      `json:"payload"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	PublishedAt pgtype.Timestamptz `json:"published_at"`
+}
+
 type CatalogReservation struct {
 	IdempotencyKey string             `json:"idempotency_key"`
 	CabinetID      string             `json:"cabinet_id"`
