@@ -21,6 +21,6 @@ sql:
             nullable: true
             go_type:
               type: "CabinetImages"
-          - column: "*.images"
+          - column: "catalog.outbox.payload"
             go_type:
-              type: "CabinetImages"
+              type: "[]byte"

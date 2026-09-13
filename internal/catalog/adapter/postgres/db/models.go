@@ -54,7 +54,7 @@ type CatalogOutbox struct {
 	ID          interface{}        `json:"id"`
 	AggregateID string             `json:"aggregate_id"`
 	EventType   string             `json:"event_type"`
-	Payload     CabinetImages      `json:"payload"`
+	Payload     []byte             `json:"payload"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	PublishedAt pgtype.Timestamptz `json:"published_at"`
 }

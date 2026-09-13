@@ -116,10 +116,10 @@ VALUES ($1, $2, $3, $4)
 `
 
 type InsertOutboxEventParams struct {
-	ID          interface{}   `json:"id"`
-	AggregateID string        `json:"aggregate_id"`
-	EventType   string        `json:"event_type"`
-	Payload     CabinetImages `json:"payload"`
+	ID          interface{} `json:"id"`
+	AggregateID string      `json:"aggregate_id"`
+	EventType   string      `json:"event_type"`
+	Payload     []byte      `json:"payload"`
 }
 
 // InsertOutboxEvent records an event in the outbox table within the active transaction.
