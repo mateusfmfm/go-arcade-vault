@@ -17,7 +17,7 @@ CREATE TABLE catalog.order_items (
 );
 
 CREATE TABLE catalog.outbox (
-    id VARCHAR9(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     aggregate_id VARCHAR(36) NOT NULL,
     event_type TEXT NOT NULL,
     payload JSONB NOT NULL,
