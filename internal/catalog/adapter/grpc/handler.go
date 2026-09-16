@@ -8,6 +8,7 @@ import (
 	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/app"
 	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/domain"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -72,6 +73,69 @@ func (h *CabinetHandler) ReserveStock(ctx context.Context, req *catalogv1.Reserv
 		IdempotencyKey: req.IdempotencyKey,
 		Cabinet:        mapCabinetToProto(c),
 	}, nil
+}
+
+func (h *CabinetHandler) CreateOrder(ctx context.Context, req *catalogv1.CreateOrderRequest) (*catalogv1.CreateOrderResponse, error) {
+	userID := extractUserIDFromContext(ctx)
+	itemsPayload := make([]app.OrderItemInput, len(req.Items))
+	for i, item := range req.Items {
+		itemsPayload[i] = app.OrderItemInput{
+			CabinetID: item.CabinetId,
+			Quantity:  int(item.Quantity),
+		}
+	}
+	order, err := h.usecase.CreateOrder(ctx, userID, itemsPayload, req.IdempotencyKey)
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrInvalidQuantity):
+			return nil, status.Errorf(codes.InvalidArgument, "invalid quantity")
+		case errors.Is(err, domain.ErrEmptyOrder):
+			return nil, status.Errorf(codes.InvalidArgument, "empty order")
+		case errors.Is(err, domain.ErrDuplicateOrder):
+			return nil, status.Errorf(codes.AlreadyExists, "duplicate order")
+		case errors.Is(err, domain.ErrNotFound):
+			return nil, status.Errorf(codes.NotFound, "order not found")
+		default:
+			return nil, status.Errorf(codes.Internal, "failed to create order: %v", err)
+		}
+	}
+	return &catalogv1.CreateOrderResponse{
+		Order: mapOrderToProto(order),
+	}, nil
+}
+
+func extractUserIDFromContext(ctx context.Context) string {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "anonymous"
+	}
+
+	values := md.Get("x-user-id")
+	if len(values) == 0 || values[0] == "" {
+		return "anonymous"
+	}
+
+	return values[0]
+}
+
+func mapOrderToProto(o *domain.Order) *catalogv1.Order {
+	pbItems := make([]*catalogv1.OrderLine, len(o.Items))
+	for i, item := range o.Items {
+		pbItems[i] = &catalogv1.OrderLine{
+			CabinetId:      item.CabinetID,
+			Quantity:       int32(item.Quantity),
+			UnitPriceCents: item.UnitPriceCents,
+		}
+	}
+
+	return &catalogv1.Order{
+		Id:             o.ID,
+		UserId:         o.UserID,
+		Status:         string(o.Status),
+		TotalCents:     o.TotalCents,
+		Items:          pbItems,
+		IdempotencyKey: o.IdempotencyKey,
+	}
 }
 
 func mapCabinetToProto(c *domain.Cabinet) *catalogv1.Cabinet {

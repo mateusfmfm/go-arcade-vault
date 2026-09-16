@@ -53,7 +53,7 @@ func (u *CabinetUsecase) ReserveStockTx(ctx context.Context, cabinetID string, q
 
 }
 
-func (u *CabinetUsecase) CreateOrderTx(ctx context.Context, userID string, items []OrderItemInput, idempotencyKey string) (*domain.Order, error) {
+func (u *CabinetUsecase) CreateOrder(ctx context.Context, userID string, items []OrderItemInput, idempotencyKey string) (*domain.Order, error) {
 
 	//1 Validate user ID
 	userID = strings.TrimSpace(userID)

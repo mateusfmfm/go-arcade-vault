@@ -13,6 +13,7 @@ import (
 	catalogv1 "github.com/mateusfmfm/go-arcade-vault/api/proto/catalog/v1"
 	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/adapter/grpc"
 	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/adapter/postgres"
+	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/adapter/publisher"
 	"github.com/mateusfmfm/go-arcade-vault/internal/catalog/app"
 	"github.com/mateusfmfm/go-arcade-vault/pkg/telemetry"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -85,6 +86,19 @@ func main() {
 	useCase := app.NewCabinetUsecase(repo)
 	catalogHandler := grpc.NewCabinetHandler(useCase)
 
+	//Initialize log publisher structured to Outbox
+	eventPublisher := publisher.NewLogPublisher(logger)
+
+	// Initializes outbox Worker in background
+	outboxWorker := app.NewOutboxWorker(repo, eventPublisher, logger)
+
+	//Creates a dedicated context to worker lifecycle
+	workerCtx, workerCancel := context.WithCancel(ctx)
+	defer workerCancel()
+
+	//trigger worker running at ervery 1 second in a separated goroutine
+	go outboxWorker.Run(workerCtx, 1*time.Second)
+
 	//5. Listener TCP
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
@@ -118,6 +132,9 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
+	//Stops the outbox worker
+	workerCancel()
 
 	slog.Info("shutting down catalog service...")
 	server.GracefulStop()
