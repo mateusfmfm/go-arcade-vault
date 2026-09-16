@@ -41,13 +41,18 @@ func TestCreateOrderTx(t *testing.T) {
 
 		gotItems := orderItemsByCabinet(order.Items)
 		assert.Equal(t, 2, gotItems[cabMK].Quantity)
+		assert.Equal(t, int64(320000), gotItems[cabMK].UnitPriceCents)
 		assert.Equal(t, 1, gotItems[cabTMNT].Quantity)
+		assert.Equal(t, int64(580000), gotItems[cabTMNT].UnitPriceCents)
 
 		persisted, err := repo.GetOrder(ctx, order.ID)
 		require.NoError(t, err)
 		assert.Equal(t, domain.StatusPendingPayment, persisted.Status)
 		assert.Equal(t, order.TotalCents, persisted.TotalCents)
 		require.Len(t, persisted.Items, 2)
+		persistedItems := orderItemsByCabinet(persisted.Items)
+		assert.Equal(t, int64(320000), persistedItems[cabMK].UnitPriceCents)
+		assert.Equal(t, int64(580000), persistedItems[cabTMNT].UnitPriceCents)
 
 		assert.Equal(t, 3, cabinetQuantity(t, ctx, pool, cabMK))
 		assert.Equal(t, 2, cabinetQuantity(t, ctx, pool, cabTMNT))

@@ -300,19 +300,67 @@ func (r *CabinetRepositoryImpl) CreateOrderTx(ctx context.Context, userID string
 }
 
 func (r *CabinetRepositoryImpl) ListUnpublishedOutboxEvents(ctx context.Context, limit int32) ([]*domain.OutboxEvent, error) {
-	return nil, nil
+	queries := db.New(r.pool)
+	events, err := queries.ListUnpublishedOutboxEvents(ctx, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list unpublished outbox events: %w", err)
+	}
+
+	outboxEvents := make([]*domain.OutboxEvent, len(events))
+	for i, event := range events {
+		outboxEvents[i] = mapOutboxEventToDomain(event)
+	}
+	return outboxEvents, nil
 }
 
 func (r *CabinetRepositoryImpl) MarkOutboxEventPublished(ctx context.Context, id string) error {
+	queries := db.New(r.pool)
+	err := queries.MarkOutboxEventPublished(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to mark outbox event published: %w", err)
+	}
 	return nil
+}
+
+func mapOutboxEventToDomain(event db.CatalogOutbox) *domain.OutboxEvent {
+	var updatedAt *time.Time
+	if event.PublishedAt.Valid {
+		t := event.PublishedAt.Time
+		updatedAt = &t
+	} else if event.CreatedAt.Valid {
+		t := event.CreatedAt.Time
+		updatedAt = &t
+	}
+
+	return &domain.OutboxEvent{
+		ID:          outboxID(event.ID),
+		AggregateID: event.AggregateID,
+		EventType:   event.EventType,
+		Payload:     event.Payload,
+		UpdatedAt:   updatedAt,
+	}
+}
+
+func outboxID(id any) string {
+	switch v := id.(type) {
+	case string:
+		return v
+	case []byte:
+		return string(v)
+	default:
+		return fmt.Sprint(v)
+	}
 }
 
 func mapOrderToDomain(o db.CatalogOrder, items []db.CatalogOrderItem) *domain.Order {
 	orderLines := make([]domain.OrderLine, len(items))
 	for i, item := range items {
 		orderLines[i] = domain.OrderLine{
-			CabinetID: item.CabinetID,
-			Quantity:  int(item.Quantity),
+			ID:             item.ID,
+			OrderID:        item.OrderID,
+			CabinetID:      item.CabinetID,
+			Quantity:       int(item.Quantity),
+			UnitPriceCents: item.UnitPriceCents,
 		}
 	}
 	return &domain.Order{

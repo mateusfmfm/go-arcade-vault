@@ -93,11 +93,11 @@ func main() {
 	outboxWorker := app.NewOutboxWorker(repo, eventPublisher, logger)
 
 	//Creates a dedicated context to worker lifecycle
-	workerCtx, workerCancel := context.WithCancel(ctx)
+	workerCtx, workerCancel := context.WithCancel(context.Background())
 	defer workerCancel()
 
 	//trigger worker running at ervery 1 second in a separated goroutine
-	go outboxWorker.Run(workerCtx, 1*time.Second)
+	go outboxWorker.Run(workerCtx, time.Second)
 
 	//5. Listener TCP
 	lis, err := net.Listen("tcp", grpcPort)

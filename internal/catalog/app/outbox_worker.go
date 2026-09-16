@@ -25,13 +25,15 @@ func (w *OutboxWorker) Run(ctx context.Context, interval time.Duration) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			w.proccessBatch(ctx)
+			w.ProcessBatch(ctx)
 		}
 	}
 
 }
 
-func (w *OutboxWorker) proccessBatch(ctx context.Context) {
+// ProcessBatch publishes unpublished outbox rows, then marks them.
+// Mark happens only after a successful Publish so a crash cannot drop the event.
+func (w *OutboxWorker) ProcessBatch(ctx context.Context) {
 	pendentEvents, err := w.repository.ListUnpublishedOutboxEvents(ctx, 25)
 	if err != nil {
 		w.logger.Error("failed to list unpublished outbox events", "error", err)

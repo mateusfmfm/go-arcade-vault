@@ -75,6 +75,19 @@ func (h *CabinetHandler) ReserveStock(ctx context.Context, req *catalogv1.Reserv
 	}, nil
 }
 
+func (h *CabinetHandler) GetOrder(ctx context.Context, req *catalogv1.GetOrderRequest) (*catalogv1.GetOrderResponse, error) {
+	order, err := h.usecase.GetOrder(ctx, req.Id)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return nil, status.Errorf(codes.NotFound, "order not found: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "failed to get order: %v", err)
+	}
+	return &catalogv1.GetOrderResponse{
+		Order: mapOrderToProto(order),
+	}, nil
+}
+
 func (h *CabinetHandler) CreateOrder(ctx context.Context, req *catalogv1.CreateOrderRequest) (*catalogv1.CreateOrderResponse, error) {
 	userID := extractUserIDFromContext(ctx)
 	itemsPayload := make([]app.OrderItemInput, len(req.Items))
@@ -94,7 +107,9 @@ func (h *CabinetHandler) CreateOrder(ctx context.Context, req *catalogv1.CreateO
 		case errors.Is(err, domain.ErrDuplicateOrder):
 			return nil, status.Errorf(codes.AlreadyExists, "duplicate order")
 		case errors.Is(err, domain.ErrNotFound):
-			return nil, status.Errorf(codes.NotFound, "order not found")
+			return nil, status.Errorf(codes.NotFound, "cabinet not found")
+		case errors.Is(err, domain.ErrInsufficientStock):
+			return nil, status.Error(codes.FailedPrecondition, "insufficient stock")
 		default:
 			return nil, status.Errorf(codes.Internal, "failed to create order: %v", err)
 		}

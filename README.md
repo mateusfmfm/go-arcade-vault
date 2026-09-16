@@ -4,7 +4,7 @@ Domain API for an arcade cabinet shop: unique machines, atomic stock, orders, an
 
 Go services with Clean Architecture, gRPC internally, GraphQL at the edge, PostgreSQL via sqlc/pgx, RabbitMQ, and OpenTelemetry → Jaeger. Built as a portfolio system, not a generic CRUD store.
 
-**Status:** Phase 0 foundation — local stack, catalog gRPC health, traces, CI. Domain work lands in later [phases](docs/ROADMAP.md).
+**Status:** Phase 2 — catalog gRPC with atomic stock, `CreateOrder` + transactional outbox, in-process publisher. GraphQL gateway and Stripe land in later [phases](docs/ROADMAP.md).
 
 ## Why this exists
 
@@ -75,6 +75,20 @@ sequenceDiagram
 ```
 
 Stock is taken when the order is created, not when Stripe confirms. Failure must roll availability back. Duplicate webhooks are no-ops.
+
+## Event contract
+
+Exchange: topic `arcadevault`. Routing keys are versioned. Payload is JSON; keep it small.
+
+| Event | Direction | Routing key | Phase |
+|---|---|---|---|
+| `order.created` | catalog → payments | `arcadevault.order.created.v1` | 2 (outbox written; RabbitMQ in Phase 4) |
+| `payment.succeeded` | payments → catalog | `arcadevault.payment.succeeded.v1` | 4 |
+| `payment.failed` | payments → catalog | `arcadevault.payment.failed.v1` | 4 |
+
+Minimum payload: `event_id`, `order_id`, `occurred_at`, `amount_cents`.
+
+`CreateOrder` inserts `order.created` in the same Postgres transaction as the reservation. A worker polls unpublished rows, publishes, then sets `published_at`. Never publish-then-commit. At-least-once: if publish fails, the row stays unpublished.
 
 ## Stack
 
