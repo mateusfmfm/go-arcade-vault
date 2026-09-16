@@ -19,4 +19,6 @@ type CabinetRepository interface {
 	ReserveStockTx(ctz context.Context, cabinetID string, quantity int, idempotencyKey string) (*domain.Cabinet, error)
 	GetOrder(ctx context.Context, orderID string) (*domain.Order, error)
 	CreateOrderTx(ctx context.Context, userID string, items []OrderItemInput, idempotencyKey string) (*domain.Order, error)
+	ListUnpublishedOutboxEvents(ctx context.Context, limit int32) ([]*domain.OutboxEvent, error)
+	MarkOutboxEventPublished(ctx context.Context, id string) error
 }

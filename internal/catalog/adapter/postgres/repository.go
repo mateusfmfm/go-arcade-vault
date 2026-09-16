@@ -299,6 +299,14 @@ func (r *CabinetRepositoryImpl) CreateOrderTx(ctx context.Context, userID string
 	return mapOrderToDomain(createdOrderRow, dbOrderItems), nil
 }
 
+func (r *CabinetRepositoryImpl) ListUnpublishedOutboxEvents(ctx context.Context, limit int32) ([]*domain.OutboxEvent, error) {
+	return nil, nil
+}
+
+func (r *CabinetRepositoryImpl) MarkOutboxEventPublished(ctx context.Context, id string) error {
+	return nil
+}
+
 func mapOrderToDomain(o db.CatalogOrder, items []db.CatalogOrderItem) *domain.Order {
 	orderLines := make([]domain.OrderLine, len(items))
 	for i, item := range items {
