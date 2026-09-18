@@ -1,0 +1,55 @@
+type Cabinet {
+  id: ID!
+  slug: String!
+  model: String!
+  type: String!
+  display: String!
+  condition: String!
+  quantity: Int!
+  priceCents: Int!
+  manufacturer: String!
+  year: String!
+  images: [CabinetImage!]!
+}
+
+type CabinetImage {
+  id: ID!
+  url: String!
+  alt: String!
+  sortOrder: Int!
+}
+
+type Order {
+  id: ID!
+  userId: ID!
+  status: String!
+  totalCents: Int!
+  idempotencyKey: String!
+  items: [OrderLine!]!
+}
+
+type OrderLine {
+  cabinetId: ID!
+  quantity: Int!
+  unitPriceCents: Int!
+}
+
+input CreateOrderInput {
+  idempotencyKey: String!
+  items: [CreateOrderItemInput!]!
+}
+
+input CreateOrderItemInput {
+  cabinetId: ID!
+  quantity: Int!
+}
+
+type Query {
+  cabinets: [Cabinet!]!
+  cabinet(id: ID!): Cabinet!
+  order(id: ID!): Order!
+}
+
+type Mutation {
+  createOrder(input: CreateOrderInput!): Order!
+}
